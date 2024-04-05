@@ -1,0 +1,30 @@
+id: 479e887f-7d9a-4ccd-a74d-710e13c961aa
+timestamp: 2024-04-05T16:57:53.958Z
+source: VSCODE
+username: risbergt
+options:
+  projectName: secure-resource-server
+  workloadNamespace: workloads
+  clusterIssuerName: tap-ingress-selfsigned
+  gatewayName: gateway-postal-codes
+  msgbrokerName: msgbroker-postal-codes
+  enableRateLimiting: false
+  rateLimit:
+    requestLimitMaxRequests: 5
+    requestLimitTimeWindow: 1
+    requestLimitWindowUnits: s
+  appSSOName: appsso-postal-codes
+  appDomain: 104.42.237.80.nip.io
+  includeBuildToolWrapper: true
+  bsGitRepository: github.com?owner=trisberg&repo=test-secure-resource-server
+  bsGitBranch: main
+accelerator:
+  name: secure-resource-server
+  git:
+    url: https://github.com/vmware-tanzu/application-accelerator-samples
+    subPath: spring-secure-resource-server
+    ref: secure-resource-server
+    commit: 95eb8f6bb163a3c35123898d2f7ee5ca84e8e81e
+fragments:
+  - name: build-wrapper-maven
+  - name: tap-workload

@@ -1,0 +1,10 @@
+apiVersion: services.apps.tanzu.vmware.com/v1alpha1
+kind: ClassClaim
+metadata:
+  name: msgbroker-postal-codes
+  namespace: workloads
+spec:
+  classRef:
+    name: rabbitmq-unmanaged
+  parameters:
+    replicas: 1

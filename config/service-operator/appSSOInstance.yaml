@@ -1,0 +1,103 @@
+apiVersion: sso.apps.tanzu.vmware.com/v1alpha1
+kind: AuthServer
+metadata:
+  name: appsso-postal-codes
+  namespace: workloads
+  labels:
+    name: appsso-postal-codes
+    app: post-codes
+  annotations:
+    sso.apps.tanzu.vmware.com/allow-client-namespaces: '*'
+    sso.apps.tanzu.vmware.com/allow-unsafe-identity-provider: ""
+    sso.apps.tanzu.vmware.com/allow-unsafe-issuer-uri: ""
+spec:
+  tls:
+    issuerRef:
+      name: tap-ingress-selfsigned
+      kind: ClusterIssuer
+  tokenSignature:
+    signAndVerifyKeyRef:
+      name: appsso-postal-codes-signing-key
+  identityProviders:
+  - name: dev-users
+    internalUnsafe:
+      users:
+      - username: freemium
+        password: codes
+        roles:
+        - FREEMIUM_USER
+      - username: premium
+        password: codes
+        roles:
+        - PREMIUM_USER
+      - username: admin
+        password: codes
+        roles:
+        - ADMIN
+        - PREMIUM_USER
+      - username: security
+        password: officer
+        roles:
+        - SECURITY_OFFICER
+---
+apiVersion: secretgen.k14s.io/v1alpha1
+kind: RSAKey
+metadata:
+  name: appsso-postal-codes-signing-key
+  namespace: workloads
+spec:
+  secretTemplate:
+    type: Opaque
+    stringData:
+      key.pem: $(privateKey)
+      pub.pem: $(publicKey)
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: secret-template-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: secret-template-secret-reader
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: secret-template-secret-reader
+  namespace: workloads
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: secret-template-secret-reader
+subjects:
+- kind: ServiceAccount
+  name: secret-template-sa
+---
+apiVersion: secretgen.carvel.dev/v1alpha1
+kind: SecretTemplate
+metadata:
+  name: appsso-postal-codes-ca-cert
+spec:
+  inputResources:
+  - name: ca-cert
+    ref:
+      apiVersion: v1
+      kind: Secret
+      name: appsso-postal-codes-auth-server
+  template:
+    data:
+      ca.pem: $(.ca-cert.data.ca\.crt)
+    stringData:
+      type: ca-certificates

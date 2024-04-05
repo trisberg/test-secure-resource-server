@@ -1,0 +1,138 @@
+apiVersion: carto.run/v1alpha1
+kind: Workload
+metadata:
+  labels:
+    app.kubernetes.io/part-of: postal-code-audit-ui
+    apps.tanzu.vmware.com/has-tests: "true"
+    apps.tanzu.vmware.com/workload-type: server
+  name: postal-code-audit-ui
+  namespace: workloads
+spec:
+  build:
+    env:
+    - name: BP_NODE_RUN_SCRIPTS
+      value: build
+    - name: BP_WEB_SERVER_ROOT
+      value: dist
+  source:
+    git:
+      url: https://github.com/trisberg/test-secure-resource-server
+      ref:
+        branch: main
+    subPath: audit-ui
+---
+apiVersion: carto.run/v1alpha1
+kind: Workload
+metadata:
+  name: postal-code-audit
+  namespace: workloads
+  labels:
+    apps.tanzu.vmware.com/workload-type: server
+    apps.tanzu.vmware.com/has-tests: "true"
+    apps.tanzu.vmware.com/auto-configure-actuators: "true"
+    app.kubernetes.io/part-of: postal-code-audit
+spec:
+  resources:
+    requests:
+      memory: 500M
+      cpu: 100m
+    limits:
+      memory: 750M
+      cpu: 1500m
+  build:
+    env:
+    - name: BP_JVM_VERSION
+      value: "21"
+  serviceClaims:
+  - name: sso
+    ref:
+      apiVersion: sso.apps.tanzu.vmware.com/v1alpha1
+      kind: ClientRegistration
+      name: appsso-postal-codes
+  - name: rmq
+    ref:
+      apiVersion: services.apps.tanzu.vmware.com/v1alpha1
+      kind: ClassClaim
+      name: msgbroker-postal-codes
+  - name: cacert
+    ref:
+      apiVersion: v1
+      kind: Secret
+      name: appsso-postal-codes-ca-cert
+  source:
+    git:
+      url: https://github.com/trisberg/test-secure-resource-server
+      ref:
+        branch: main
+    subPath: audit
+---
+apiVersion: carto.run/v1alpha1
+kind: Workload
+metadata:
+  name: postal-code-search
+  namespace: workloads
+  labels:
+    apps.tanzu.vmware.com/workload-type: server
+    apps.tanzu.vmware.com/has-tests: "true"
+    apps.tanzu.vmware.com/auto-configure-actuators: "true"
+    app.kubernetes.io/part-of: postal-code-search
+spec:
+  env:
+  - name: spring_profiles_active
+    value: oauth2
+  resources:
+    requests:
+      memory: 500M
+      cpu: 100m
+    limits:
+      memory: 750M
+      cpu: 1500m
+  build:
+    env:
+    - name: BP_JVM_VERSION
+      value: "21"
+  serviceClaims:
+  - name: sso
+    ref:
+      apiVersion: sso.apps.tanzu.vmware.com/v1alpha1
+      kind: ClientRegistration
+      name: appsso-postal-codes
+  - name: rmq
+    ref:
+      apiVersion: services.apps.tanzu.vmware.com/v1alpha1
+      kind: ClassClaim
+      name: msgbroker-postal-codes
+  - name: cacert
+    ref:
+      apiVersion: v1
+      kind: Secret
+      name: appsso-postal-codes-ca-cert
+  source:
+    git:
+      url: https://github.com/trisberg/test-secure-resource-server
+      ref:
+        branch: main
+    subPath: postal-code-search
+---
+apiVersion: carto.run/v1alpha1
+kind: Workload
+metadata:
+  labels:
+    app.kubernetes.io/part-of: postal-code-search-ui
+    apps.tanzu.vmware.com/has-tests: "true"
+    apps.tanzu.vmware.com/workload-type: server
+  name: postal-code-search-ui
+  namespace: workloads
+spec:
+  build:
+    env:
+    - name: BP_NODE_RUN_SCRIPTS
+      value: build
+    - name: BP_WEB_SERVER_ROOT
+      value: dist
+  source:
+    git:
+      url: https://github.com/trisberg/test-secure-resource-server
+      ref:
+        branch: main
+    subPath: postal-code-search-ui

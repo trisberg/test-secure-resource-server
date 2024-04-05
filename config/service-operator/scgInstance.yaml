@@ -1,0 +1,15 @@
+apiVersion: tanzu.vmware.com/v1
+kind: SpringCloudGateway
+metadata:
+  name: gateway-postal-codes
+  namespace: workloads
+spec:
+  service:
+    type: ClusterIP
+  env:
+  - name: spring.cloud.gateway.httpclient.connect-timeout
+    value: "90"
+  sso:
+    secret: appsso-postal-codes
+    tls:
+      secretName: appsso-postal-codes-ca-cert

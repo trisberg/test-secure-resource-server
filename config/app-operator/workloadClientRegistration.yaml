@@ -1,0 +1,25 @@
+apiVersion: sso.apps.tanzu.vmware.com/v1alpha1
+kind: ClientRegistration
+metadata:
+  name: appsso-postal-codes
+  namespace: workloads
+spec:
+  authServerSelector:
+    matchLabels:
+      name: appsso-postal-codes
+  redirectURIs:
+  - https://postal-code-search.104.42.237.80.nip.io/login/oauth2/code/sso
+  - http://postal-code-search.104.42.237.80.nip.io/login/oauth2/code/sso
+  - https://postal-code-audit.104.42.237.80.nip.io/login/oauth2/code/sso
+  - http://postal-code-audit.104.42.237.80.nip.io/login/oauth2/code/sso
+  scopes:
+  - name: openid
+  - name: email
+  - name: profile
+  - name: roles
+  clientAuthenticationMethod: client_secret_basic
+  requireUserConsent: false
+  authorizationGrantTypes:
+  - client_credentials
+  - authorization_code
+  - refresh_token
